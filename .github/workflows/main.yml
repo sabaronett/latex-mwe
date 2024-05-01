@@ -1,6 +1,8 @@
-name: Build LaTeX document
+# Adapted from https://github.com/marketplace/actions/github-action-for-latex#example
+name: Build and deploy LaTeX PDF
 on: [push]
 jobs:
+  # Build job
   build_latex:
     runs-on: ubuntu-latest
     steps:
@@ -11,7 +13,19 @@ jobs:
         with:
           root_file: main.tex
       - name: Upload PDF file
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-pages-artifact@v2
         with:
           name: PDF
           path: main.pdf
+# Adapted from https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages#linking-separate-build-and-deploy-jobs
+  # Deployment job
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{steps.deployment.outputs.page_url}}
+    runs-on: ubuntu-latest
+    needs: build_latex
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
